@@ -1,0 +1,5 @@
+---
+
+- name: php-fpm-restart
+  sudo: yes
+  action: service name=php5-fpm state=restarted enabled=yes

@@ -1,0 +1,48 @@
+---
+
+- name: Create VPC Playbook
+  hosts:
+    - 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Create VPC
+      local_action:
+        module: ec2_vpc
+        cidr_block: 192.168.0.0/16
+        region: us-east-1
+        resource_tags:
+          Name: VPC Example
+        state: present
+        internet_gateway: true
+        subnets:
+          - cidr: 192.168.0.0/24
+            az: us-east-1a
+        route_tables:
+          - subnets:
+              - 192.168.0.0/24
+            routes:
+              - dest: 0.0.0.0/0
+                gw: igw
+      register: vpc
+
+    - name: Store the VPC id and first subnet id as facts
+      set_fact:
+        vpc_id: "{{ vpc.vpc_id }}"
+        subnet_id: "{{ vpc.subnets | map(attribute='id') | first }}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

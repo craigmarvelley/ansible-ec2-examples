@@ -1,0 +1,9 @@
+---
+
+php_packages:
+  - php5-dev
+  - php5-fpm
+
+pecl_packages:
+  - name: mongo
+    installed_name: mongo

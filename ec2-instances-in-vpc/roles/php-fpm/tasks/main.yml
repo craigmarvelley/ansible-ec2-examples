@@ -1,0 +1,37 @@
+---
+
+- name: Add apt repository for PHP libraries
+  apt_repository: repo='ppa:ondrej/php5'
+
+- name: Install packages
+  apt: pkg={{ item }} state=present
+  with_items: php_packages
+  notify:
+    - php-fpm-restart
+
+- name: Install PECL packages
+  shell: yes '' | pecl install {{ item.name }}
+  register: pecl_install_result
+  with_items: pecl_packages
+  changed_when: "'is already installed' not in pecl_install_result.stdout"
+  failed_when: "'Build process completed successfully' not in pecl_install_result.stdout and 'is already installed' not in pecl_install_result.stdout"
+  notify:
+    - php-fpm-restart
+
+- name: Get enabled modules
+  command: php -m
+  register: php_enabled_modules
+  changed_when: false
+
+- name: Install INI files for PECL packages
+  copy: src="php-{{ item.name }}.ini" dest="/etc/php5/mods-available/{{ item.name }}.ini" owner=root group=root
+  with_items: pecl_packages
+  notify:
+    - php-fpm-restart
+
+- name: Enable PECL packages
+  command: php5enmod {{ item.name }}
+  when: item.installed_name not in php_enabled_modules.stdout
+  with_items: pecl_packages
+  notify:
+    - php-fpm-restart

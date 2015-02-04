@@ -1,0 +1,11 @@
+---
+
+- include: destroy_ec2_instances.yml
+
+- hosts: 127.0.0.1
+  gather_facts: false
+  tasks:
+    - name: Pause a few seconds to ensure instances are de-registered
+      pause: seconds=10
+
+- include: destroy_vpc.yml

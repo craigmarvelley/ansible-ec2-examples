@@ -1,0 +1,27 @@
+---
+
+- name: Destroy ec2 instances playbook
+  hosts: tag_name_Webserver
+
+  tasks:
+    - name: Gather ec2 facts for instance
+      action: ec2_facts
+
+    - name: Terminate instance
+      local_action:
+        module: ec2
+        region: us-east-1
+        instance_ids: "{{ ansible_ec2_instance_id }}"
+        state: absent
+        wait: true
+      register: terminated_instances
+
+    - name: Destroy associated security groups
+      local_action:
+        module: ec2_group
+        name: "{{ item }}"
+        description: "{{ item }}"
+        region: us-east-1
+        state: absent
+      with_items: ansible_ec2_security_groups
+      run_once: true
